@@ -3,18 +3,26 @@ from options import Options
 from data_loader import DataLoader
 from knn import NearestNeighbors
 import time
+import csv
+
+CATEGORIES = ['COVID', 'NORMAL', 'VIRAL']
 
 
-def classify_images(train_samples, train_labels, test_samples, test_labels):
+def classify_images(train_samples, train_labels, test_samples, test_labels, write_file=False):
     knn = NearestNeighbors(opt, train_samples, train_labels)
     correct_classified = 0
+    row_list = []
 
     for test_sample, test_label in zip(test_samples, test_labels):
         pred = knn.predict(test_sample)
         if pred == test_label:
             correct_classified += 1
+        if write_file is True:
+            row_list.append([len(row_list) + 1, CATEGORIES[pred]])
 
-    return correct_classified, 100 * (correct_classified / len(test_samples))
+    acc = 100 * (correct_classified / len(test_samples))
+    print("%d/%d samples are correctly classified - Accuracy: %0.2f" % (correct_classified, len(test_samples), acc))
+    return acc, row_list
 
 
 def train(sample_folds, label_folds):
@@ -37,11 +45,8 @@ def train(sample_folds, label_folds):
         test_samples = list(sample_folds[i])
         test_labels = list(label_folds[i])
 
-        correct, acc = classify_images(train_samples, train_labels, test_samples, test_labels)
+        acc, _ = classify_images(train_samples, train_labels, test_samples, test_labels)
         accuracies.append(acc)
-
-        print("End of fold %d - %d/%d samples are correctly classified - Accuracy: %0.2f" %
-              (i, correct, len(test_samples), acc))
 
     print("Mean accuracy: %0.2f - Computation time: %0.2f second(s)" %
           (sum(accuracies) / len(accuracies), time.clock() - time_start))
@@ -49,8 +54,11 @@ def train(sample_folds, label_folds):
 
 
 def test(train_samples, train_labels, test_samples, test_labels):
-    correct, acc = classify_images(train_samples, train_labels, test_samples, test_labels)
-    print("End of test - %d/%d samples are correctly classified - Accuracy: %0.2f" % (correct, len(test_samples), acc))
+    acc, row_list = classify_images(train_samples, train_labels, test_samples, test_labels, write_file=True)
+    with open('predictions.csv', 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(["Id", "Category"])
+        writer.writerows(row_list)
 
 
 if __name__ == '__main__':

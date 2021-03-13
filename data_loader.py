@@ -28,7 +28,7 @@ class DataLoader:
         dataset = []
         for subset_dir_name in SUBSET_DIR_NAMES:
             subset_img_names = sorted(os.listdir(self.opt.dataroot + '/train/' + subset_dir_name))
-            for img_name in subset_img_names[:20]:
+            for img_name in subset_img_names:
                 sample = {
                     'sample': self.extract_feature(self.opt.dataroot + '/train/' + subset_dir_name + '/' + img_name),
                     'label': SUBSET_DIR_NAMES.index(subset_dir_name)}
