@@ -2,9 +2,11 @@ import numpy as np
 from options import Options
 from data_loader import DataLoader
 from knn import NearestNeighbors
+import time
 
 
 def train(sample_folds, label_folds):
+    time_start = time.clock()
     accuracies = []
     for i in range(len(sample_folds)):
         # create train samples by removing current sample fold from sample folds
@@ -35,7 +37,9 @@ def train(sample_folds, label_folds):
         print("End of fold %d - %d/%d samples are correctly classified - Accuracy: %0.2f" %
               (i, correct_classified, len(test_samples), accuracies[-1]))
 
-    print("Mean accuracy: %0.2f" % (sum(accuracies) / len(accuracies)))
+    print("Mean accuracy: %0.2f - Computation time: %0.2f second(s)" %
+          (sum(accuracies) / len(accuracies), time.clock() - time_start))
+    print("-------------------")
 
 
 if __name__ == '__main__':
