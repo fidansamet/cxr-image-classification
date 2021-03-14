@@ -9,7 +9,7 @@ class Options():
         parser.add_argument('--neighbor_num', type=int, default=3, help='number of closest neighbors to consider')
         parser.add_argument('--weighted_knn', action='store_true', help='if specified, use weighted k-nn algorithm')
         parser.add_argument('--kfold', action='store_true', help='if specified, use weighted k-fold algorithm')
-        parser.add_argument('--fold_num', type=int, default=10, help='number of folds for k-fold algorithm')
+        parser.add_argument('--fold_num', type=int, default=5, help='number of folds for k-fold algorithm')
         parser.add_argument('--tiny_img', action='store_true', help='if specified, use tiny image feature')
         parser.add_argument('--canny', action='store_true', help='if specified, use shape feature')
         parser.add_argument('--gabor', action='store_true', help='if specified, use texture feature')
@@ -21,7 +21,7 @@ class Options():
     def print_options(self, opt):
         options = ''
         options += '----------------- Options ---------------\n'
-        for k, v in sorted(vars(opt).items()):
+        for k, v in vars(opt).items():
             comment = ''
             default = self.parser.get_default(k)
             if v != default:

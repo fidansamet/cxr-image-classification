@@ -2,6 +2,7 @@ import numpy as np
 from options import Options
 from data_loader import DataLoader
 from knn import NearestNeighbors
+import matplotlib.pyplot as plt
 import time
 import csv
 
@@ -26,6 +27,7 @@ def classify_images(train_samples, train_labels, test_samples, test_labels, writ
 
 
 def train(sample_folds, label_folds):
+    print("Train started")
     time_start = time.clock()
     accuracies = []
     for i in range(len(sample_folds)):
@@ -48,17 +50,53 @@ def train(sample_folds, label_folds):
         acc, _ = classify_images(train_samples, train_labels, test_samples, test_labels)
         accuracies.append(acc)
 
-    print("Mean accuracy: %0.2f - Computation time: %0.2f second(s)" %
-          (sum(accuracies) / len(accuracies), time.clock() - time_start))
+    mean_acc = sum(accuracies) / len(accuracies)
+    comp_time = time.clock() - time_start
+    print("Mean accuracy: %0.2f - Computation time: %0.2f second(s)" % (mean_acc, comp_time))
     print("-------------------")
+    return mean_acc, comp_time
 
 
 def test(train_samples, train_labels, test_samples, test_labels):
+    print("Test started")
+    time_start = time.clock()
     acc, row_list = classify_images(train_samples, train_labels, test_samples, test_labels, write_file=True)
+    print("Computation time: %0.2f second(s)" % (time.clock() - time_start))
+    print("-------------------")
     with open('predictions.csv', 'w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["Id", "Category"])
         writer.writerows(row_list)
+
+
+def plot_graph(title, x, y, y_label):
+    plt.title(title)
+    plt.plot(x, y)
+    plt.xticks(np.arange(1, 21, 1))
+    plt.xlabel('Neighbor Number')
+    plt.ylabel(y_label)
+    plt.show()
+
+
+def experiment(opt, img_folds, gt_folds):
+    x, y_acc, y_time = [], [], []
+    for i in range(20):
+        print("Starting k = %d" % (i+1))
+        opt.neighbor_num = i + 1
+        x.append(i + 1)
+        acc, t = train(img_folds, gt_folds)
+        y_acc.append(acc)
+        y_time.append(t)
+    f = open("k-knn.txt", "a")
+    f.write("k\n")
+    f.write(str(x) + "\n")
+    f.write("Accuracy\n")
+    f.write(str(y_acc) + "\n")
+    f.write("Time\n")
+    f.write(str(y_time) + "\n")
+    f.close()
+    plot_graph("Accuracies for Different Neighbor Numbers (k-NN)", x, y_acc, "Classification Accuracy")
+    plot_graph("Computation Times for Different Neighbor Numbers (k-NN)", x, y_time, "Computation Time (sec.)")
 
 
 if __name__ == '__main__':
@@ -66,7 +104,8 @@ if __name__ == '__main__':
     data_loader = DataLoader(opt)
     if opt.phase == 'train':
         img_folds, gt_folds = data_loader.split_cross_valid()
-        train(img_folds, gt_folds)
+        # train(img_folds, gt_folds)
+        experiment(opt, img_folds, gt_folds)
     else:  # test phase
         train_imgs, train_gts, test_imgs, test_gts = data_loader.get_train_test_data()
         test(train_imgs, train_gts, test_imgs, test_gts)

@@ -18,8 +18,9 @@ class DataLoader:
         if opt.phase != 'train':  # test phase
             self.test_samples, self.test_labels = [], []
             self.load_test_data()
+        print("Data loaded")
 
-    def extract_feature(self, path, img_size=(32, 32)):
+    def extract_feature(self, path, img_size=(64, 64)):
         image = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2GRAY)
         # TODO
         return cv2.resize(image, img_size).flatten()
