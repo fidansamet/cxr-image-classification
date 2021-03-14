@@ -72,31 +72,36 @@ def test(train_samples, train_labels, test_samples, test_labels):
 def plot_graph(title, x, y, y_label):
     plt.title(title)
     plt.plot(x, y)
-    plt.xticks(np.arange(1, 21, 1))
-    plt.xlabel('Neighbor Number')
+    # plt.xticks(np.arange(1, 21, 1))
+    # plt.xticks(x, rotation=15)
+    plt.xlabel('Distance Measures')
     plt.ylabel(y_label)
     plt.show()
 
 
 def experiment(opt, img_folds, gt_folds):
     x, y_acc, y_time = [], [], []
-    for i in range(20):
-        print("Starting k = %d" % (i+1))
-        opt.neighbor_num = i + 1
-        x.append(i + 1)
+    dist_metrics = ['euclidean', 'manhattan', 'hamming', 'minkowski']
+    for i in range(len(dist_metrics)):
+        # print("Starting k = %d" % (i+1))
+        # opt.neighbor_num = i + 1
+        x.append(i+1)
+        # print("Starting " + dist_measure[i])
+        # opt.dist_measure = dist_measure[i]
+        # x.append(dist_metrics[i].capitalize())
         acc, t = train(img_folds, gt_folds)
         y_acc.append(acc)
         y_time.append(t)
-    f = open("k-knn.txt", "a")
-    f.write("k\n")
+    f = open("dist_measures-k=8.txt", "a")
+    f.write("Dist measures\n")
     f.write(str(x) + "\n")
     f.write("Accuracy\n")
     f.write(str(y_acc) + "\n")
     f.write("Time\n")
     f.write(str(y_time) + "\n")
     f.close()
-    plot_graph("Accuracies for Different Neighbor Numbers (k-NN)", x, y_acc, "Classification Accuracy")
-    plot_graph("Computation Times for Different Neighbor Numbers (k-NN)", x, y_time, "Computation Time (sec.)")
+    plot_graph("Accuracies for Different Distance Measures (k-NN)", x, y_acc, "Classification Accuracy")
+    plot_graph("Computation Times for Different Distance Measures (k-NN)", x, y_time, "Computation Time (sec.)")
 
 
 if __name__ == '__main__':
