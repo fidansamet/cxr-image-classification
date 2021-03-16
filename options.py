@@ -3,22 +3,19 @@ import argparse
 
 class Options():
     def initialize(self, parser):
-        parser.add_argument('--dataroot', type=str, default="./datasets/covid19", help='path to dataset')
+        parser.add_argument('--dataroot', type=str, default='./datasets/covid19', help='path to dataset')
         parser.add_argument('--phase', type=str, default='train', help='train or test phase')
         parser.add_argument('--name', type=str, default='knn', help='name of the experiment')
         parser.add_argument('--neighbor_num', type=int, default=8, help='number of closest neighbors to consider')
-        parser.add_argument('--dist_measure', type=str, default="euclidean", help='distance measure for calculation')
+        parser.add_argument('--dist_measure', type=str, default='euclidean', help='distance measure for calculation')
         parser.add_argument('--weighted_knn', action='store_true', help='if specified, use weighted k-nn algorithm')
         parser.add_argument('--fold_num', type=int, default=5, help='number of folds for k-fold algorithm')
         parser.add_argument('--canny', action='store_true', help='if specified, use shape feature')
-        parser.add_argument('--canny_path', type=str, default="features/canny.txt", help='path to canny features')
         parser.add_argument('--gabor', action='store_true', help='if specified, use texture feature')
-        parser.add_argument('--gabor_path', type=str, default="features/gabor.txt", help='path to gabor features')
         parser.add_argument('--sift', action='store_true', help='if specified, use SIFT feature')
-        parser.add_argument('--sift_path', type=str, default="features/sift.txt", help='path to SIFT features')
         parser.add_argument('--vgg19', action='store_true', help='if specified, use deep image features')
-        parser.add_argument('--vgg19_path', type=str, default="features/vgg19.txt", help='path to vgg19 features')
         parser.add_argument('--tiny_img', action='store_true', help='if specified, use tiny image feature')
+        parser.add_argument('--features_path', type=str, default='features', help='path to saved features')
 
         self.parser = parser
         return parser

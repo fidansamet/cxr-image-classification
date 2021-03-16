@@ -16,54 +16,60 @@ class DataLoader:
         """
         self.opt = opt
         self.train_samples, self.train_labels = [], []
-        self.get_features()
+        self.get_features("train")
         self.load_train_data()
-        if opt.phase != 'train':  # test phase
+        if opt.phase != "train":  # test phase
             self.test_samples, self.test_labels = [], []
+            self.get_features("test")
             self.load_test_data()
         print("Data loaded")
 
-    def get_features(self):
+    def get_features(self, folder_name):
         # get saved features or create files to save features
         if self.opt.canny:
-            if os.path.exists(self.opt.canny_path):
+            self.canny_path = self.opt.features_path + "/" + folder_name + "/canny.txt"
+            if os.path.exists(self.canny_path):
                 self.canny_read = True
-                self.canny_iter = iter(np.loadtxt(self.opt.canny_path, dtype=int))
+                self.canny_iter = iter(np.loadtxt(self.canny_path, dtype=int))
             else:
                 self.canny_read = False
-                open(self.opt.canny_path, 'wb')
+                open(self.canny_path, 'wb')
                 self.canny_features = []
 
         if self.opt.gabor:
-            if os.path.exists(self.opt.gabor_path):
+            self.gabor_path = self.opt.features_path + "/" + folder_name + "/gabor.txt"
+            if os.path.exists(self.gabor_path):
                 self.gabor_read = True
-                self.gabor_iter = iter(np.loadtxt(self.opt.gabor_path, dtype=int))
+                self.gabor_iter = iter(np.loadtxt(self.gabor_path, dtype=int))
             else:
                 self.gabor_read = False
-                open(self.opt.gabor_path, 'wb')
+                open(self.gabor_path, 'wb')
                 self.gabor_features = []
 
         if self.opt.sift:
-            if os.path.exists(self.opt.sift_path):
+            self.sift_path = self.opt.features_path + "/" + folder_name + "/sift.txt"
+            if os.path.exists(self.sift_path):
                 # TODO type
                 self.sift_read = True
-                self.sift_iter = iter(np.loadtxt(self.opt.sift_path, dtype=int))
+                self.sift_iter = iter(np.loadtxt(self.sift_path, dtype=int))
             else:
                 self.sift_read = False
-                open(self.opt.sift_path, 'wb')
+                open(self.sift_path, 'wb')
                 self.sift_features = []
 
         if self.opt.vgg19:
-            if os.path.exists(self.opt.vgg19_path):
+            self.vgg19_path = self.opt.features_path + "/" + folder_name + "/vgg19.txt"
+            if os.path.exists(self.vgg19_path):
                 self.vgg19_read = True
-                self.vgg19_iter = iter(np.loadtxt(self.opt.vgg19_path, dtype=np.float32))
+                self.vgg19_iter = iter(np.loadtxt(self.vgg19_path, dtype=np.float32))
             else:
                 self.vgg19 = filters.VGG19()
                 self.vgg19_read = False
-                open(self.opt.vgg19_path, 'wb')
+                open(self.vgg19_path, 'wb')
                 self.vgg19_features = []
 
     def extract_features(self, path, img_size=(64, 64), tiny_img_size=(32, 32)):
+        print("Extracting features from " + path)
         image = cv2.imread(path)
         image_features = np.array([], dtype=np.float32)
         if self.opt.canny:
@@ -113,20 +119,20 @@ class DataLoader:
         # save features for reuse
         if self.opt.canny:
             if not self.canny_read:
-                np.savetxt(self.opt.canny_path, self.canny_features, fmt='%d')
+                np.savetxt(self.canny_path, self.canny_features, fmt='%d')
 
         if self.opt.gabor:
             if not self.gabor_read:
-                np.savetxt(self.opt.gabor_path, self.gabor_features, fmt='%d')
+                np.savetxt(self.gabor_path, self.gabor_features, fmt='%d')
 
         if self.opt.sift:
             if not self.sift_read:
                 # TODO: type float
-                np.savetxt(self.opt.sift_path, self.sift_features, fmt='%d')
+                np.savetxt(self.sift_path, self.sift_features, fmt='%d')
 
         if self.opt.vgg19:
             if not self.vgg19_read:
-                np.savetxt(self.opt.vgg19_path, self.vgg19_features, fmt='%f')
+                np.savetxt(self.vgg19_path, self.vgg19_features, fmt='%f')
 
     def load_train_data(self):
         dataset = []
@@ -138,7 +144,6 @@ class DataLoader:
                     'label': SUBSET_DIR_NAMES.index(subset_dir_name)}
                 dataset.append(sample)
             random.Random(RANDOM_SEED).shuffle(dataset)
-
         self.save_features()
 
         for data in dataset:
@@ -154,6 +159,7 @@ class DataLoader:
                 if SUBSET_DIR_NAMES[i] in img_name:
                     self.test_labels.append(i)
                     break
+        self.save_features()
 
     def split_cross_valid(self):
         # get split data for k-fold cross validation
