@@ -1,6 +1,10 @@
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import torch
+from PIL import Image
+from torchvision import transforms
+from torchvision.models import vgg19
 
 
 # gray scale
@@ -105,6 +109,27 @@ def gabor_process(img):
 
     return out
 
+
+class VGG19:
+    def __init__(self):
+        self.preprocess = transforms.Compose([
+            transforms.Resize(256),
+            transforms.CenterCrop(224),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        ])
+        self.model = vgg19(pretrained=True)
+        # remove last fully connected layer
+        self.model.classifier = torch.nn.Sequential(*list(self.model.classifier.children())[:-1])
+
+    def forward(self, img):
+        input_tensor = self.preprocess(img)
+        input_batch = input_tensor.unsqueeze(0)
+
+        with torch.no_grad():
+            features = self.model(input_batch)
+        return features
+
 # Read image
 # img = cv2.imread('dataset/COVID/COVID (1).PNG').astype(np.float32)
 
@@ -113,3 +138,8 @@ def gabor_process(img):
 
 # canny edge process
 # out = canny_edge(img)
+
+# image = Image.open('datasets/covid19/train/COVID/COVID (1).png').convert("RGB")
+# vgg = VGG19()
+# features = vgg.forward(image)
+# print(features)

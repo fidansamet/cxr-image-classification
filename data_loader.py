@@ -2,6 +2,7 @@ import os
 import cv2
 import random
 import numpy as np
+from PIL import Image
 import filters
 
 SUBSET_DIR_NAMES = ['COVID', 'NORMAL', 'Viral Pneumonia']
@@ -54,17 +55,17 @@ class DataLoader:
 
         if self.opt.vgg19:
             if os.path.exists(self.opt.vgg19_path):
-                # TODO type float
                 self.vgg19_read = True
-                self.vgg19_iter = iter(np.loadtxt(self.opt.vgg19_path, dtype=int))
+                self.vgg19_iter = iter(np.loadtxt(self.opt.vgg19_path, dtype=np.float32))
             else:
+                self.vgg19 = filters.VGG19()
                 self.vgg19_read = False
                 open(self.opt.vgg19_path, 'wb')
                 self.vgg19_features = []
 
     def extract_features(self, path, img_size=(64, 64), tiny_img_size=(32, 32)):
         image = cv2.imread(path)
-        image_features = np.array([], dtype=np.int32)
+        image_features = np.array([], dtype=np.float32)
         if self.opt.canny:
             if self.canny_read:
                 image_features = np.concatenate((image_features, next(self.canny_iter)), axis=0)
@@ -85,8 +86,17 @@ class DataLoader:
                 self.gabor_features.append(gabor_flatten)
                 image_features = np.concatenate((image_features, gabor_flatten), axis=0)
 
-        # TODO: SIFT
-        # TODO: VGG19
+        # TODO: SIFT or HoG
+
+        if self.opt.vgg19:
+            if self.vgg19_read:
+                image_features = np.concatenate((image_features, next(self.vgg19_iter)), axis=0)
+            else:
+                pil_image = Image.open(path).convert("RGB")
+                vgg19_extracted = self.vgg19.forward(pil_image)
+                vgg19_extracted = vgg19_extracted.numpy()[0]
+                self.vgg19_features.append(vgg19_extracted)
+                image_features = np.concatenate((image_features, vgg19_extracted), axis=0)
 
         if self.opt.tiny_img:
             tiny_flatten = cv2.cvtColor(cv2.resize(image, tiny_img_size), cv2.COLOR_BGR2GRAY).flatten()
@@ -116,8 +126,7 @@ class DataLoader:
 
         if self.opt.vgg19:
             if not self.vgg19_read:
-                # TODO: type
-                np.savetxt(self.opt.vgg19_path, self.vgg19_features, fmt='%d')
+                np.savetxt(self.opt.vgg19_path, self.vgg19_features, fmt='%f')
 
     def load_train_data(self):
         dataset = []
@@ -148,10 +157,10 @@ class DataLoader:
 
     def split_cross_valid(self):
         # get split data for k-fold cross validation
-        return np.array_split(np.array(self.train_samples, dtype=np.int32), self.opt.fold_num), \
+        return np.array_split(np.array(self.train_samples, dtype=np.float32), self.opt.fold_num), \
                np.array_split(np.array(self.train_labels, dtype=np.int32), self.opt.fold_num)
 
     def get_train_test_data(self):
         # get all data for test phase
-        return np.array(self.train_samples, dtype=np.int32), np.array(self.train_labels, dtype=np.int32), \
-               np.array(self.test_samples, dtype=np.int32), np.array(self.test_labels, dtype=np.int32)
+        return np.array(self.train_samples, dtype=np.float32), np.array(self.train_labels, dtype=np.int32), \
+               np.array(self.test_samples, dtype=np.float32), np.array(self.test_labels, dtype=np.int32)
