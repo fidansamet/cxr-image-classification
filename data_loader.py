@@ -46,16 +46,15 @@ class DataLoader:
                 open(self.gabor_path, 'wb')
                 self.gabor_features = []
 
-        if self.opt.sift:
-            self.sift_path = self.opt.features_path + "/" + folder_name + "/sift.txt"
-            if os.path.exists(self.sift_path):
-                # TODO type
-                self.sift_read = True
-                self.sift_iter = iter(np.loadtxt(self.sift_path, dtype=int))
+        if self.opt.hog:
+            self.hog_path = self.opt.features_path + "/" + folder_name + "/hog.txt"
+            if os.path.exists(self.hog_path):
+                self.hog_read = True
+                self.hog_iter = iter(np.loadtxt(self.hog_path, dtype=np.float32))
             else:
-                self.sift_read = False
-                open(self.sift_path, 'wb')
-                self.sift_features = []
+                self.hog_read = False
+                open(self.hog_path, 'wb')
+                self.hog_features = []
 
         if self.opt.vgg19:
             self.vgg19_path = self.opt.features_path + "/" + folder_name + "/vgg19.txt"
@@ -68,7 +67,7 @@ class DataLoader:
                 open(self.vgg19_path, 'wb')
                 self.vgg19_features = []
 
-    def extract_features(self, path, img_size=(64, 64), tiny_img_size=(32, 32)):
+    def extract_features(self, path, img_size=(64, 64), tiny_img_size=(16, 16)):
         print("Extracting features from " + path)
         image = cv2.imread(path)
         image_features = np.array([], dtype=np.float32)
@@ -92,7 +91,15 @@ class DataLoader:
                 self.gabor_features.append(gabor_flatten)
                 image_features = np.concatenate((image_features, gabor_flatten), axis=0)
 
-        # TODO: SIFT or HoG
+        if self.opt.hog:
+            if self.hog_read:
+                image_features = np.concatenate((image_features, next(self.hog_iter)), axis=0)
+            else:
+                hog = filters.histogram_of_oriented_gradients(image)
+                hog.resize(img_size)
+                hog_flatten = hog.flatten()
+                self.hog_features.append(hog_flatten)
+                image_features = np.concatenate((image_features, hog_flatten), axis=0)
 
         if self.opt.vgg19:
             if self.vgg19_read:
@@ -125,10 +132,9 @@ class DataLoader:
             if not self.gabor_read:
                 np.savetxt(self.gabor_path, self.gabor_features, fmt='%d')
 
-        if self.opt.sift:
-            if not self.sift_read:
-                # TODO: type float
-                np.savetxt(self.sift_path, self.sift_features, fmt='%d')
+        if self.opt.hog:
+            if not self.hog_read:
+                np.savetxt(self.hog_path, self.hog_features, fmt='%f')
 
         if self.opt.vgg19:
             if not self.vgg19_read:

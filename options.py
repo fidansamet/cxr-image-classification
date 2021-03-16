@@ -12,7 +12,7 @@ class Options():
         parser.add_argument('--fold_num', type=int, default=5, help='number of folds for k-fold algorithm')
         parser.add_argument('--canny', action='store_true', help='if specified, use shape feature')
         parser.add_argument('--gabor', action='store_true', help='if specified, use texture feature')
-        parser.add_argument('--sift', action='store_true', help='if specified, use SIFT feature')
+        parser.add_argument('--hog', action='store_true', help='if specified, use HoG feature')
         parser.add_argument('--vgg19', action='store_true', help='if specified, use deep image features')
         parser.add_argument('--tiny_img', action='store_true', help='if specified, use tiny image feature')
         parser.add_argument('--features_path', type=str, default='features', help='path to saved features')

@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
+from skimage.feature import hog
 from PIL import Image
 from torchvision import transforms
 from torchvision.models import vgg19
@@ -91,7 +92,7 @@ def gabor_process(img):
     As = [0, 30, 60, 90, 120, 150]
 
     # prepare pyplot
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0, hspace=0, wspace=0.2)
+    # plt.subplots_adjust(left=0, right=1, top=1, bottom=0, hspace=0, wspace=0.2)
 
     out = np.zeros([H, W], dtype=np.float32)
 
@@ -108,6 +109,12 @@ def gabor_process(img):
     out = out.astype(np.uint8)
 
     return out
+
+
+def histogram_of_oriented_gradients(img):
+    fd, hog_image = hog(img, orientations=9, pixels_per_cell=(8, 8), cells_per_block=(2, 2), visualize=True,
+                        multichannel=True)
+    return hog_image
 
 
 class VGG19:
