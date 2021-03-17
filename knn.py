@@ -12,7 +12,8 @@ class NearestNeighbors:
         self.ground_truths = ground_truths
 
     def calculate_weights(self, dists):
-        dists[dists == 0.0] = 0.00001
+        dists[dists == 0.0] = 0.00001  # division by 0 handle for floats
+        dists[dists == 0] = 1  # division by 0 handle for integers
         weights = 1.0 / dists
         return weights / np.sum(weights)
 
