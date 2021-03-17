@@ -13,8 +13,7 @@ class NearestNeighbors:
 
     def calculate_weights(self, dists):
         weights = 1.0 / dists
-        weights = weights / np.sum(weights)
-        return weights
+        return weights / np.sum(weights)
 
     def calculate_dist(self, x, y):
         if self.opt.dist_measure == 'euclidean':
@@ -39,4 +38,13 @@ class NearestNeighbors:
         min_dist_indices = dists.argsort()[:self.opt.neighbor_num]  # get smallest k distance indices
         y_preds = self.ground_truths[min_dist_indices]  # get ground truths of closest samples
 
-        return np.argmax(np.bincount(y_preds))  # return most frequent ground truth(closest neighbor on equality)
+        if self.opt.weighted_knn:
+            votes = np.zeros(3, dtype=np.float32)  # votes for 3 classes
+            nearest_neighbors = dists[min_dist_indices]
+            weights = self.calculate_weights(nearest_neighbors)
+            for i, j in zip(weights, y_preds):  # predicted class and its weight
+                votes[j] += i * 1.0
+            return np.where(votes == np.amax(votes))[0][0]  # return class with highest vote
+
+        else:
+            return np.argmax(np.bincount(y_preds))  # return most frequent ground truth(closest neighbor on equality)
