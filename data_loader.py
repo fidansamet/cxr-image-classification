@@ -73,51 +73,85 @@ class DataLoader:
         image_features = np.array([], dtype=np.float32)
         if self.opt.canny:
             if self.canny_read:
-                image_features = np.concatenate((image_features, next(self.canny_iter)), axis=0)
+                canny_flatten = next(self.canny_iter)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(canny_flatten)
+                    canny_flatten = canny_flatten / norm
+                image_features = np.concatenate((image_features, canny_flatten), axis=0)
             else:
                 canny = filters.canny_edge(image)
                 canny.resize(img_size, refcheck=False)
                 canny_flatten = canny.flatten()
                 self.canny_features.append(canny_flatten)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(canny_flatten)
+                    canny_flatten = canny_flatten / norm
                 image_features = np.concatenate((image_features, canny_flatten), axis=0)
 
         if self.opt.gabor:
             if self.gabor_read:
-                image_features = np.concatenate((image_features, next(self.gabor_iter)), axis=0)
+                gabor_flatten = next(self.gabor_iter)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(gabor_flatten)
+                    gabor_flatten = gabor_flatten / norm
+                image_features = np.concatenate((image_features, gabor_flatten), axis=0)
             else:
                 gabor = filters.gabor_process(image)
                 gabor.resize(img_size)
                 gabor_flatten = gabor.flatten()
                 self.gabor_features.append(gabor_flatten)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(gabor_flatten)
+                    gabor_flatten = gabor_flatten / norm
                 image_features = np.concatenate((image_features, gabor_flatten), axis=0)
 
         if self.opt.hog:
             if self.hog_read:
-                image_features = np.concatenate((image_features, next(self.hog_iter)), axis=0)
+                hog_flatten = next(self.hog_iter)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(hog_flatten)
+                    hog_flatten = hog_flatten / norm
+                image_features = np.concatenate((image_features, hog_flatten), axis=0)
             else:
                 hog = filters.histogram_of_oriented_gradients(image)
                 hog.resize(img_size)
                 hog_flatten = hog.flatten()
                 self.hog_features.append(hog_flatten)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(hog_flatten)
+                    hog_flatten = hog_flatten / norm
                 image_features = np.concatenate((image_features, hog_flatten), axis=0)
 
         if self.opt.vgg19:
             if self.vgg19_read:
-                image_features = np.concatenate((image_features, next(self.vgg19_iter)), axis=0)
+                vgg19_extracted = next(self.vgg19_iter)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(vgg19_extracted)
+                    vgg19_extracted = vgg19_extracted / norm
+                image_features = np.concatenate((image_features, vgg19_extracted), axis=0)
             else:
                 pil_image = Image.open(path).convert("RGB")
                 vgg19_extracted = self.vgg19.forward(pil_image)
                 vgg19_extracted = vgg19_extracted.numpy()[0]
                 self.vgg19_features.append(vgg19_extracted)
+                if self.opt.normalize:
+                    norm = np.linalg.norm(vgg19_extracted)
+                    vgg19_extracted = vgg19_extracted / norm
                 image_features = np.concatenate((image_features, vgg19_extracted), axis=0)
 
         if self.opt.tiny_img:
             tiny_flatten = cv2.cvtColor(cv2.resize(image, tiny_img_size), cv2.COLOR_BGR2GRAY).flatten()
+            if self.opt.normalize:
+                norm = np.linalg.norm(tiny_flatten)
+                tiny_flatten = tiny_flatten / norm
             image_features = np.concatenate((image_features, tiny_flatten), axis=0)
 
         # if no image feature specified, extract 64x64 feature
         if image_features.size == 0:
             small_flatten = cv2.cvtColor(cv2.resize(image, img_size), cv2.COLOR_BGR2GRAY).flatten()
+            if self.opt.normalize:
+                norm = np.linalg.norm(small_flatten)
+                small_flatten = small_flatten / norm
             image_features = np.concatenate((image_features, small_flatten), axis=0)
 
         return image_features

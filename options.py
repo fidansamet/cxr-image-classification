@@ -16,6 +16,7 @@ class Options():
         parser.add_argument('--vgg19', action='store_true', help='if specified, use deep image features')
         parser.add_argument('--tiny_img', action='store_true', help='if specified, use tiny image feature')
         parser.add_argument('--features_path', type=str, default='features', help='path to saved features')
+        parser.add_argument('--normalize', action='store_true', help='if specified, normalize the features')
 
         self.parser = parser
         return parser
