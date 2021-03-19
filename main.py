@@ -108,7 +108,7 @@ def plot_graph(title, x, y, y_label):
     plt.show()
 
 
-def experiment(opt, img_folds, gt_folds):
+def experiment(opt, img_folds, gt_folds, temp):
     x = []
     y_acc = {'euclidean': [], 'manhattan': [], 'hamming': [], 'minkowski': []}
     y_time = {'euclidean': [], 'manhattan': [], 'hamming': [], 'minkowski': []}
@@ -125,7 +125,7 @@ def experiment(opt, img_folds, gt_folds):
             y_acc[j].append(acc)
             y_time[j].append(t)
 
-    f = open("%d-fold.txt" % opt.fold_num, "a")
+    f = open(temp + "_%d-fold.txt" % opt.fold_num, "a")
     f.write("Neighbors\n")
     f.write(str(x) + "\n")
     f.write("Accuracy\n")
@@ -144,14 +144,14 @@ if __name__ == '__main__':
     opt = Options().parse()
     data_loader = DataLoader(opt)
     if opt.phase == 'train':
-        for i in range(3, 11, 1):
+        for i in range(5, 7):
             opt.fold_num = i
             img_folds, gt_folds = data_loader.split_cross_valid()
-            experiment(opt, img_folds, gt_folds)
+            experiment(opt, img_folds, gt_folds, 'wknn_vgg19_hog')
 
         # train(img_folds, gt_folds)
         # experiment(opt, img_folds, gt_folds)
 
-    else:  # test phase
-        train_imgs, train_gts, test_imgs, test_gts = data_loader.get_train_test_data()
-        test(train_imgs, train_gts, test_imgs, test_gts)
+    # else:  # test phase
+    # train_imgs, train_gts, test_imgs, test_gts = data_loader.get_train_test_data()
+    # test(train_imgs, train_gts, test_imgs, test_gts)
