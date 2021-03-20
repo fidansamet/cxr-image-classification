@@ -126,11 +126,13 @@ class VGG19:
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ])
         self.model = vgg19(pretrained=True)
+        # change mode to evaluation
         self.model.eval()
         # remove last fully connected layer
         self.model.classifier = torch.nn.Sequential(*list(self.model.classifier.children())[:-1])
 
     def forward(self, img):
+        # preprocess image for network
         input_tensor = self.preprocess(img)
         input_batch = input_tensor.unsqueeze(0)
 

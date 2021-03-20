@@ -13,12 +13,12 @@ CATEGORIES = ['COVID', 'NORMAL', 'VIRAL']
 
 
 def classify_images(train_samples, train_labels, test_samples, test_labels, write_file=False):
-    knn = NearestNeighbors(opt, train_samples, train_labels)
+    knn = NearestNeighbors(opt, train_samples, train_labels)  # create knn classifier
     correct_classified = 0
     row_list, trues, preds = [], [], []
 
     for test_sample, test_label in zip(test_samples, test_labels):
-        pred = knn.predict(test_sample)
+        pred = knn.predict(test_sample)  # predict the test label
         trues.append(test_label)
         preds.append(pred)
         if pred == test_label:
@@ -26,7 +26,7 @@ def classify_images(train_samples, train_labels, test_samples, test_labels, writ
         if write_file is True:
             row_list.append([len(row_list) + 1, CATEGORIES[pred]])
 
-    acc = 100 * (correct_classified / len(test_samples))
+    acc = 100 * (correct_classified / len(test_samples))  # calculate the accuracy
     print("%d/%d samples are correctly classified - Accuracy: %0.2f" % (correct_classified, len(test_samples), acc))
     return acc, row_list, trues, preds
 
@@ -79,12 +79,9 @@ def test(train_samples, train_labels, test_samples, test_labels):
 
 def plot_conf_matrix(true, pred):
     score = metrics.accuracy_score(true, pred)
-    # cls_report = metrics.classification_report(ground_truth, test_result)
     conf_mat = metrics.confusion_matrix(true, pred)
-
-    print('Accuracy: {:.3f}'.format(score))
-    # print(cls_report)
-    print(conf_mat)
+    # print('Accuracy: {:.3f}'.format(score))
+    # print(conf_mat)
 
     df_cm = pd.DataFrame(conf_mat, CATEGORIES, CATEGORIES)
     plt.figure(figsize=(10, 7))
@@ -114,11 +111,11 @@ def experiment(opt, img_folds, gt_folds, temp):
     y_time = {'euclidean': [], 'manhattan': [], 'hamming': [], 'minkowski': []}
     dist_metrics = ['euclidean', 'manhattan', 'hamming', 'minkowski']
 
-    for i in range(10):
+    for i in range(10):  # experiment different number of neighbor number
         print("Starting k = %d" % (i + 1))
         opt.neighbor_num = i + 1
         x.append(i + 1)
-        for j in dist_metrics:
+        for j in dist_metrics:  # experiment different distance measures
             print("Starting " + j)
             opt.dist_measure = j
             acc, t = train(img_folds, gt_folds)
@@ -144,14 +141,14 @@ if __name__ == '__main__':
     opt = Options().parse()
     data_loader = DataLoader(opt)
     if opt.phase == 'train':
-        for i in range(5, 7):
-            opt.fold_num = i
-            img_folds, gt_folds = data_loader.split_cross_valid()
-            experiment(opt, img_folds, gt_folds, 'wknn_vgg19_hog')
+        img_folds, gt_folds = data_loader.split_cross_valid()
+        train(img_folds, gt_folds)
 
-        # train(img_folds, gt_folds)
-        # experiment(opt, img_folds, gt_folds)
+        # for i in range(3, 7):
+        #     opt.fold_num = i
+        #     img_folds, gt_folds = data_loader.split_cross_valid()
+        #     experiment(opt, img_folds, gt_folds, 'wknn_vgg19_hog')
 
-    # else:  # test phase
-    # train_imgs, train_gts, test_imgs, test_gts = data_loader.get_train_test_data()
-    # test(train_imgs, train_gts, test_imgs, test_gts)
+    else:  # test phase
+        train_imgs, train_gts, test_imgs, test_gts = data_loader.get_train_test_data()
+        test(train_imgs, train_gts, test_imgs, test_gts)

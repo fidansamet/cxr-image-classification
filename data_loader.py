@@ -68,6 +68,7 @@ class DataLoader:
                 self.vgg19_features = []
 
     def extract_features(self, path, img_size=(64, 64), tiny_img_size=(16, 16)):
+        # extract features from images or read features from files
         print("Extracting features from " + path)
         image = cv2.imread(path)
         image_features = np.array([], dtype=np.float32)
@@ -156,7 +157,7 @@ class DataLoader:
             image_features = np.concatenate((image_features, tiny_flatten), axis=0)
 
         # if no image feature specified, extract 64x64 feature
-        if image_features.size == 0:
+        if self.opt.small_img or image_features.size == 0:
             small_flatten = cv2.cvtColor(cv2.resize(image, img_size), cv2.COLOR_BGR2GRAY).flatten()
             if self.opt.normalize:
                 norm = np.linalg.norm(small_flatten)
@@ -167,7 +168,7 @@ class DataLoader:
         return image_features
 
     def save_features(self):
-        # save features for reuse
+        # save features to file for reuse
         if self.opt.canny:
             if not self.canny_read:
                 np.savetxt(self.canny_path, self.canny_features, fmt='%d')

@@ -6,8 +6,8 @@ class Options():
         parser.add_argument('--dataroot', type=str, default='./datasets/covid19', help='path to dataset')
         parser.add_argument('--phase', type=str, default='train', help='train or test phase')
         parser.add_argument('--name', type=str, default='knn', help='name of the experiment')
-        parser.add_argument('--neighbor_num', type=int, default=8, help='number of closest neighbors to consider')
-        parser.add_argument('--dist_measure', type=str, default='euclidean', help='distance measure for calculation')
+        parser.add_argument('--neighbor_num', type=int, default=6, help='number of closest neighbors to consider')
+        parser.add_argument('--dist_measure', type=str, default='manhattan', help='distance measure for calculation')
         parser.add_argument('--weighted_knn', action='store_true', help='if specified, use weighted k-nn algorithm')
         parser.add_argument('--fold_num', type=int, default=5, help='number of folds for k-fold algorithm')
         parser.add_argument('--canny', action='store_true', help='if specified, use shape feature')
@@ -15,6 +15,7 @@ class Options():
         parser.add_argument('--hog', action='store_true', help='if specified, use HoG feature')
         parser.add_argument('--vgg19', action='store_true', help='if specified, use deep image features')
         parser.add_argument('--tiny_img', action='store_true', help='if specified, use tiny image feature')
+        parser.add_argument('--small_img', action='store_true', help='if specified, use small image feature')
         parser.add_argument('--features_path', type=str, default='features', help='path to saved features')
         parser.add_argument('--normalize', action='store_true', help='if specified, normalize the features')
 

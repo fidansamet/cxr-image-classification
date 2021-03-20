@@ -28,7 +28,7 @@ class NearestNeighbors:
             # return np.sum(np.abs(x - y)**5)**(1/5)
             return np.abs(np.sum(np.abs(x - y) ** 3)) ** (1 / 3)
 
-    def find_neighbors(self, x, y):
+    def find_dists(self, x, y):
         return np.asarray([self.calculate_dist(i, y) for i in x])
 
     def predict(self, test_sample):
@@ -36,7 +36,7 @@ class NearestNeighbors:
         :param test_sample: test sample to classify
         :return: test sample class prediction
         """
-        dists = self.find_neighbors(self.train_samples, test_sample)
+        dists = self.find_dists(self.train_samples, test_sample)
         min_dist_indices = dists.argsort()[:self.opt.neighbor_num]  # get smallest k distance indices
         y_preds = self.ground_truths[min_dist_indices]  # get ground truths of closest samples
 
