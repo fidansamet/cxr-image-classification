@@ -2,6 +2,18 @@
 
 This repository contains the implementation of nearest neighbor and weighted nearest neighbor algorithms to detect Covid-19 disease from images. By extending these algorithms, it classifies CXR images as Covid-19 positive case, viral pneumonia or normal CXR.
 
+## Run
+
+### Train
+
+    python main.py
+
+### Test
+
+    python main.py --phase test
+
+For more options, please refer to options.py
+
 
 ## Dataset
 
